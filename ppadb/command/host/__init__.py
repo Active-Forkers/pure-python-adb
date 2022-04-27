@@ -87,8 +87,8 @@ class Host(Command):
     def remote_disconnect(self, host=None, port=None):
         cmd = "host:disconnect:"
         if host:
-            cmd = "host:disconnect:{}".format(host)
+            cmd = f"host:disconnect:{host}"
             if port:
-                cmd = "{}:{}".format(cmd, port)
+                cmd = f"{cmd}:{port}"
 
         return self._execute_cmd(cmd)

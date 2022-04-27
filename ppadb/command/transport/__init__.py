@@ -11,7 +11,7 @@ logger = AdbLogging.get_logger(__name__)
 
 class Transport(Command):
     def transport(self, connection):
-        cmd = "host:transport:{}".format(self.serial)
+        cmd = f"host:transport:{self.serial}"
         connection.send(cmd)
 
         return connection
@@ -19,7 +19,7 @@ class Transport(Command):
     def shell(self, cmd, handler=None, timeout=None):
         conn = self.create_connection(timeout=timeout)
 
-        cmd = "shell:{}".format(cmd)
+        cmd = f"shell:{cmd}"
         conn.send(cmd)
 
         if handler:
@@ -53,7 +53,7 @@ class Transport(Command):
     def clear(self, package):
         clear_result_pattern = "(Success|Failed)"
 
-        result = self.shell("pm clear {}".format(package))
+        result = self.shell(f"pm clear {package}"
         m = re.search(clear_result_pattern, result)
 
         if m is not None and m.group(1) == "Success":
@@ -126,7 +126,7 @@ class Transport(Command):
 
     def local(self, path):
         if ":" not in path:
-            path = "localfilesystem:{}".format(path)
+            path = f"localfilesystem:{path}"
 
         conn = self.create_connection()
         conn.send(path)
@@ -135,7 +135,7 @@ class Transport(Command):
 
     def log(self, name):
         conn = self.create_connection()
-        cmd = "log:{}".format(name)
+        cmd = f"log:{name}"
 
         conn.send(cmd)
 
@@ -162,10 +162,7 @@ class Transport(Command):
         return True
 
     def reverse(self, remote, local):
-        cmd = "reverse:forward:{remote}:{local}".format(
-            remote=remote,
-            local=local
-        )
+        cmd = f"reverse:forward:{remote}:{local}"
 
         conn = self.create_connection()
         with conn:

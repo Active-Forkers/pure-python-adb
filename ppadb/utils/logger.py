@@ -11,7 +11,7 @@ class AdbLogging:
     @classmethod
     def get_logger(cls, name):
         if not name.startswith(cls.PACKAGE_NAME):
-            raise RuntimeError("The package logger name should be 'adb.xxx.xxx' but {}".format(name))
+            raise RuntimeError(f"The package logger name should be 'adb.xxx.xxx' but {name} found")
 
         logger = logging.getLogger(name)
         if logger.handlers:

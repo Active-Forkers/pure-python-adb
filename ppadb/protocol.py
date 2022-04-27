@@ -16,7 +16,7 @@ class Protocol:
 
     @staticmethod
     def encode_length(length):
-        return "{0:04X}".format(length)
+        return f"{length:04X}"
 
     @staticmethod
     def encode_data(data):

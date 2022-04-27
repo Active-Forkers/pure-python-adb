@@ -20,7 +20,7 @@ class Sync:
 
     @staticmethod
     def temp(path):
-        return "{}/{}".format(Sync.TEMP_PATH, os.path.basename(path))
+        return f"{Sync.TEMP_PATH}/{os.path.basename(path)}"
 
     def push(self, src, dest, mode, progress=None):
         """Push from local path |src| to |dest| on device.
@@ -28,7 +28,7 @@ class Sync:
         :param progress: callback, called with (filename, total_size, sent_size)
         """
         if not os.path.exists(src):
-            raise FileNotFoundError("Can't find the source file {}".format(src))
+            raise FileNotFoundError(f"Can't find the source file {src}")
 
         stat = os.stat(src)
 
@@ -39,10 +39,7 @@ class Sync:
 
         # SEND
         mode = mode | S_IFREG
-        args = "{dest},{mode}".format(
-            dest=dest,
-            mode=mode
-        )
+        args = f"{dest},{mode}"
         self._send_str(Protocol.SEND, args)
 
         # DATA
@@ -100,7 +97,7 @@ class Sync:
         le_len = self._little_endian(length)
         data = cmd.encode() + le_len
 
-        logger.debug("Send length: {}".format(data))
+        logger.debug(f"Send length: {data}")
         self.connection.write(data)
 
     def _send_str(self, cmd, args):
@@ -110,10 +107,10 @@ class Sync:
         Length:
             {4}{4}{str length}
         """
-        logger.debug("{} {}".format(cmd, args))
+        logger.debug(f"{cmd} {args}")
         args = args.encode('utf-8')
 
         le_args_len = self._little_endian(len(args))
         data = cmd.encode() + le_args_len + args
-        logger.debug("Send string: {}".format(data))
+        logger.debug(f"Send string: {data}")
         self.connection.write(data)

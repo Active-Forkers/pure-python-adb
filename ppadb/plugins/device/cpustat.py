@@ -124,12 +124,12 @@ class CPUStat(Plugin):
             return ProcessCPUStat(items[1], int(items[13]), int(items[14]))
 
     def get_all_thread_cpu(self, pid):
-        result = self.shell("ls /proc/{}/task".format(pid))
+        result = self.shell(f"ls /proc/{pid}/task")
         tids = list(map(lambda line: line.strip(), result.split("\n")))
 
         thread_result = {}
         for tid in tids:
-            result = self.shell("cat /proc/{}/task/{}/stat".format(pid, tid))
+            result = self.shell(f"cat /proc/{pid}/task/{tid}/stat")
 
             if "No such file or directory" not in result:
                 items = result.split()

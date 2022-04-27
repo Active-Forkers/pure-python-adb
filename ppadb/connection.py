@@ -21,7 +21,7 @@ class Connection:
         self.close()
 
     def connect(self):
-        logger.debug("Connect to adb server - {}:{}".format(self.host, self.port))
+        logger.debug(f"Connect to adb server - {self.host}:{self.port}")
 
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -36,11 +36,7 @@ class Connection:
             self.socket.connect((self.host, self.port))
         except socket.error as e:
             self.close()
-            raise RuntimeError("ERROR: connecting to {}:{} {}.\nIs adb running on your computer?".format(
-                self.host,
-                self.port,
-                e
-            ))
+            raise RuntimeError(f"ERROR: connecting to {self.host}:{self.port} {e}.\nIs adb running on your computer?")
 
         return self.socket
 
@@ -87,7 +83,7 @@ class Connection:
         recv = self._recv(4).decode('utf-8')
         if recv != Protocol.OKAY:
             error = self._recv(1024).decode('utf-8')
-            raise RuntimeError("ERROR: {} {}".format(repr(recv), error))
+            raise RuntimeError(f"ERROR: {repr(recv)} {error}")
 
         return True
 

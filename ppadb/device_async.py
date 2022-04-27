@@ -47,7 +47,7 @@ class DeviceAsync(TransportAsync):
     async def push(self, src, dest, mode=0o644, progress=None):
         exists, isfile, isdir, basename, walk = await get_running_loop().run_in_executor(None, _get_src_info, src)
         if not exists:
-            raise FileNotFoundError("Cannot find {}".format(src))
+            raise FileNotFoundError(f"Cannot find {src}")
 
         if isfile:
             await self._push(src, dest, mode, progress)
@@ -56,7 +56,7 @@ class DeviceAsync(TransportAsync):
             for root, dirs, files in walk:
                 root_dir_path = os.path.join(basename, root.replace(src, ""))
 
-                await self.shell("mkdir -p {}/{}".format(dest, root_dir_path))
+                await self.shell(f"mkdir -p {dest}/{root_dir_path}")
 
                 for item in files:
                     await self._push(os.path.join(root, item), os.path.join(dest, root_dir_path, item), mode, progress)
