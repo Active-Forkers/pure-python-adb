@@ -5,7 +5,7 @@ import time
 
 class TransportAsync:
     async def transport(self, connection):
-        cmd = "host:transport:{}".format(self.serial)
+        cmd = f"host:transport:{self.serial}"
         await connection.send(cmd)
 
         return connection
@@ -13,7 +13,7 @@ class TransportAsync:
     async def shell(self, cmd, timeout=None):
         conn = await self.create_connection(timeout=timeout)
 
-        cmd = "shell:{}".format(cmd)
+        cmd = f"shell:{cmd}"
         await conn.send(cmd)
 
         result = await conn.read_all()

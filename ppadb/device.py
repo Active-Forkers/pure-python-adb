@@ -56,7 +56,7 @@ class Device(Transport, Serial, Input, Utils, WM, Traffic, CPUStat, BatteryStats
 
     def push(self, src, dest, mode=0o644, progress=None):
         if not os.path.exists(src):
-            raise FileNotFoundError("Cannot find {}".format(src))
+            raise FileNotFoundError(f"Cannot find {src}")
         elif os.path.isfile(src):
             self._push(src, dest, mode, progress)
         elif os.path.isdir(src):
@@ -69,7 +69,7 @@ class Device(Transport, Serial, Input, Utils, WM, Traffic, CPUStat, BatteryStats
                     subdir = subdir[1:]
                 root_dir_path = os.path.join(basename, subdir)
 
-                self.shell("mkdir -p {}/{}".format(dest, root_dir_path))
+                self.shell(f"mkdir -p {dest}/{root_dir_path}")
 
                 for item in files:
                     self._push(os.path.join(root, item), os.path.join(dest, root_dir_path, item), mode, progress)
@@ -98,14 +98,14 @@ class Device(Transport, Serial, Input, Utils, WM, Traffic, CPUStat, BatteryStats
         if forward_lock: parameters.append("-l")
         if reinstall: parameters.append("-r")
         if test: parameters.append("-t")
-        if len(installer_package_name) > 0: parameters.append("-i {}".format(installer_package_name))
+        if len(installer_package_name) > 0: parameters.append(f"-i {installer_package_name}")
         if shared_mass_storage: parameters.append("-s")
         if internal_system_memory: parameters.append("-f")
         if downgrade: parameters.append("-d")
         if grand_all_permissions: parameters.append("-g")
 
         try:
-            result = self.shell("pm install {} {}".format(" ".join(parameters), cmd_quote(dest)))
+            result = self.shell(f"pm install {' '.join(parameters)} {cmd_quote(dest)}")
             match = re.search(self.INSTALL_RESULT_PATTERN, result)
 
             if match and match.group(1) == "Success":
@@ -116,7 +116,7 @@ class Device(Transport, Serial, Input, Utils, WM, Traffic, CPUStat, BatteryStats
             else:
                 raise InstallError(dest, result)
         finally:
-            self.shell("rm -f {}".format(dest))
+            self.shell(f"rm -f {dest}")
 
     def is_installed(self, package):
         result = self.shell('pm path {}'.format(package))

@@ -9,7 +9,7 @@ class Activity:
         self.pid = pid
 
     def __str__(self):
-        return "{}/{} - {}".format(self.package, self.activity, self.pid)
+        return f"{self.package}/{self.activity} - {self.pid}"
 
 
 class MemInfo:
@@ -92,7 +92,7 @@ class Utils(Plugin):
             return None
 
     def get_tids(self, pid):
-        result = self.shell("ls /proc/{}/task".format(pid))
+        result = self.shell(f"ls /proc/{pid}/task")
         return list(map(lambda line: line.strip(), result.split("\n")))
 
     def get_package_version_name(self, package_name):

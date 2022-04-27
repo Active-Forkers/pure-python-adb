@@ -15,15 +15,9 @@ class Serial(Command):
 
     def forward(self, local, remote, norebind=False):
         if norebind:
-            cmd = "host-serial:{serial}:forward:norebind:{local};{remote}".format(
-                serial=self.serial,
-                local=local,
-                remote=remote)
+            cmd = f"host-serial:{self.serial}:forward:norebind:{local};{remote}"
         else:
-            cmd = "host-serial:{serial}:forward:{local};{remote}".format(
-                serial=self.serial,
-                local=local,
-                remote=remote)
+            cmd = f"host-serial:{self.serial}:forward:{local};{remote}"
 
         self._execute_cmd(cmd, with_response=False)
 
@@ -32,7 +26,7 @@ class Serial(Command):
         # And https://android.googlesource.com/platform/system/core/+/master/adb/SERVICES.TXT#130
         # The 'list-forward' always lists all existing forward connections from the adb server
         # So we need filter these by self.
-        cmd = "host-serial:{serial}:list-forward".format(serial=self.serial)
+        cmd = f"host-serial:{self.serial}:list-forward"
         result = self._execute_cmd(cmd)
 
         forward_map = {}
@@ -46,7 +40,7 @@ class Serial(Command):
         return forward_map
 
     def killforward(self, local):
-        cmd = "host-serial:{serial}:killforward:{local}".format(serial=self.serial, local=local)
+        cmd = f"host-serial:{self.serial}:killforward:{local}"
         self._execute_cmd(cmd, with_response=False)
 
     def killforward_all(self):
@@ -57,13 +51,13 @@ class Serial(Command):
             self.killforward(local)
 
     def get_device_path(self):
-        cmd = "host-serial:{serial}:get-devpath".format(serial=self.serial)
+        cmd = f"host-serial:{self.serial}:get-devpath"
         return self._execute_cmd(cmd)
 
     def get_serial_no(self):
-        cmd = "host-serial:{serial}:get-serialno".format(serial=self.serial)
+        cmd = f"host-serial:{self.serial}:get-serialno"
         return self._execute_cmd(cmd)
 
     def get_state(self):
-        cmd = "host-serial:{serial}:get-state".format(serial=self.serial)
+        cmd = f"host-serial:{self.serial}:get-state"
         return self._execute_cmd(cmd)

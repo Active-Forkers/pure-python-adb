@@ -33,7 +33,7 @@ class ConnectionAsync:
                 self.reader, self.writer = await asyncio.open_connection(self.host, self.port)
 
         except (OSError, asyncio.TimeoutError) as e:
-            raise RuntimeError("ERROR: connecting to {}:{} {}.\nIs adb running on your computer?".format(self.host, self.port, e))
+            raise RuntimeError(f"ERROR: connecting to {self.host}:{self.port} {e}.\nIs adb running on your computer?")
 
         return self
 
@@ -76,7 +76,7 @@ class ConnectionAsync:
         recv = (await self._recv(4)).decode('utf-8')
         if recv != Protocol.OKAY:
             error = (await self._recv(1024)).decode('utf-8')
-            raise RuntimeError("ERROR: {} {}".format(repr(recv), error))
+            raise RuntimeError(f"ERROR: {repr(recv)} {error}")
 
         return True
 

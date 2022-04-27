@@ -25,19 +25,13 @@ class Input(Plugin):
         return self.shell(cmd)
 
     def input_tap(self, x, y):
-        return self.shell("input tap {} {}".format(x, y))
+        return self.shell(f"input tap {x} {y}")
 
     def input_swipe(self, start_x, start_y, end_x, end_y, duration):
-        return self.shell("input swipe {} {} {} {} {}".format(
-            start_x,
-            start_y,
-            end_x,
-            end_y,
-            duration
-        ))
+        return self.shell("input swipe {start_x} {start_y} {end_x} {end_y} {duration}")
 
     def input_press(self):
         return self.shell("input press")
 
     def input_roll(self, dx, dy):
-        return self.roll("roll {} {}".format(dx, dy))
+        return self.roll("roll {dx} {dy}")

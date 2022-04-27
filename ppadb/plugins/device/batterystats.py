@@ -32,7 +32,7 @@ class BatteryStats(Plugin):
             print(dummy, uid, mode, id, remaining_fields)
             SectionClass = section_module.get_section(id)
             if not SectionClass:
-                logger.error("Unknown section {} in batterystats".format(id))
+                logger.error(f"Unknown section {id} in batterystats")
                 continue
 
             if id not in sections:

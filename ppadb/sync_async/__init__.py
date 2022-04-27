@@ -39,13 +39,13 @@ class SyncAsync:
         exists, timestamp, total_size = await get_running_loop().run_in_executor(None, _get_src_info, src)
 
         if not exists:
-            raise FileNotFoundError("Can't find the source file {}".format(src))
+            raise FileNotFoundError(f"Can't find the source file {src}")
 
         sent_size = 0
 
         # SEND
         mode = mode | S_IFREG
-        args = "{dest},{mode}".format(dest=dest, mode=mode)
+        args = f"{dest},{mode}"
         await self._send_str(Protocol.SEND, args)
 
         # DATA
@@ -106,7 +106,7 @@ class SyncAsync:
         le_len = self._little_endian(length)
         data = cmd.encode() + le_len
 
-        logger.debug("Send length: {}".format(data))
+        logger.debug(f"Send length: {data}")
         await self.connection.write(data)
 
     async def _send_str(self, cmd, args):
@@ -116,10 +116,10 @@ class SyncAsync:
         Length:
             {4}{4}{str length}
         """
-        logger.debug("{} {}".format(cmd, args))
+        logger.debug(f"{cmd} {args}")
         args = args.encode('utf-8')
 
         le_args_len = self._little_endian(len(args))
         data = cmd.encode() + le_args_len + args
-        logger.debug("Send string: {}".format(data))
+        logger.debug(f"Send string: {data}")
         await self.connection.write(data)
