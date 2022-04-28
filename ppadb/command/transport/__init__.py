@@ -4,19 +4,21 @@ import time
 from ppadb import ClearError
 from ppadb.command import Command
 
+from ppadb.connection import Connection
+
 from ppadb.utils.logger import AdbLogging
 
 logger = AdbLogging.get_logger(__name__)
 
 
 class Transport(Command):
-    def transport(self, connection):
+    def transport(self, connection: Connection) -> Connection:
         cmd = f"host:transport:{self.serial}"
         connection.send(cmd)
 
         return connection
 
-    def shell(self, cmd, handler=None, timeout=None):
+    def shell(self, cmd: str, handler=None, timeout=None) -> str:
         conn = self.create_connection(timeout=timeout)
 
         cmd = f"shell:{cmd}"
@@ -29,7 +31,7 @@ class Transport(Command):
             conn.close()
             return result.decode('utf-8')
 
-    def sync(self):
+    def sync(self) -> Connection:
         conn = self.create_connection()
 
         cmd = "sync:"
@@ -37,7 +39,7 @@ class Transport(Command):
 
         return conn
 
-    def screencap(self):
+    def screencap(self) -> bytes:
         conn = self.create_connection()
 
         with conn:
@@ -50,7 +52,7 @@ class Transport(Command):
         else:
             return result
 
-    def clear(self, package):
+    def clear(self, package: str) -> bool:
         clear_result_pattern = "(Success|Failed)"
 
         result = self.shell(f"pm clear {package}"
@@ -62,10 +64,10 @@ class Transport(Command):
             logger.error(result)
             raise ClearError(package, result.strip())
 
-    def framebuffer(self):
+    def framebuffer(self) -> None:
         raise NotImplemented()
 
-    def list_features(self):
+    def list_features(self) -> dict:
         result = self.shell("pm list features 2>/dev/null")
 
         result_pattern = "^feature:(.*?)(?:=(.*?))?\r?$"
@@ -78,7 +80,7 @@ class Transport(Command):
 
         return features
 
-    def list_packages(self):
+    def list_packages(self) -> list:
         result = self.shell("pm list packages 2>/dev/null")
         result_pattern = "^package:(.*?)\r?$"
 
@@ -90,7 +92,7 @@ class Transport(Command):
 
         return packages
 
-    def get_properties(self):
+    def get_properties(self) -> dict:
         result = self.shell("getprop")
         result_pattern = "^\[([\s\S]*?)\]: \[([\s\S]*?)\]\r?$"
 
@@ -102,7 +104,7 @@ class Transport(Command):
 
         return properties
 
-    def list_reverses(self):
+    def list_reverses(self) -> list:
         conn = self.create_connection()
         with conn:
             cmd = "reverse:list-forward"
@@ -124,7 +126,7 @@ class Transport(Command):
 
         return reverses
 
-    def local(self, path):
+    def local(self, path: str) -> Connection:
         if ":" not in path:
             path = f"localfilesystem:{path}"
 
@@ -133,7 +135,7 @@ class Transport(Command):
 
         return conn
 
-    def log(self, name):
+    def log(self, name: str) -> Connection:
         conn = self.create_connection()
         cmd = f"log:{name}"
 
@@ -141,10 +143,10 @@ class Transport(Command):
 
         return conn
 
-    def logcat(self, clear=False):
+    def logcat(self, clear=False) -> None:
         raise NotImplemented()
 
-    def reboot(self):
+    def reboot(self) -> bool:
         conn = self.create_connection()
 
         with conn:
@@ -153,7 +155,7 @@ class Transport(Command):
 
         return True
 
-    def remount(self):
+    def remount(self) -> bool:
         conn = self.create_connection()
 
         with conn:
@@ -161,7 +163,7 @@ class Transport(Command):
 
         return True
 
-    def reverse(self, remote, local):
+    def reverse(self, remote: str, local: str) -> bool:
         cmd = f"reverse:forward:{remote}:{local}"
 
         conn = self.create_connection()
@@ -173,7 +175,7 @@ class Transport(Command):
 
         return True
 
-    def root(self):
+    def root(self) -> bool:
         # Restarting adbd as root
         conn = self.create_connection()
         with conn:
@@ -185,7 +187,7 @@ class Transport(Command):
             else:
                 raise RuntimeError(result.strip())
 
-    def wait_boot_complete(self, timeout=60, timedelta=1):
+    def wait_boot_complete(self, timeout=60, timedelta=1) -> bool:
         """
         :param timeout: second
         :param timedelta: second
