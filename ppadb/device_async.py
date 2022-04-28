@@ -7,10 +7,12 @@ import re
 import os
 
 from ppadb.command.transport_async import TransportAsync
+from ppadb.connection_async import ConnectionAsync
+from ppadb.client_async import ClientAsync as Client
 from ppadb.sync_async import SyncAsync
 
 
-def _get_src_info(src):
+def _get_src_info(src: str) -> tuple:
     exists = os.path.exists(src)
     isfile = os.path.isfile(src)
     isdir = os.path.isdir(src)
@@ -24,11 +26,11 @@ class DeviceAsync(TransportAsync):
     INSTALL_RESULT_PATTERN = "(Success|Failure|Error)\s?(.*)"
     UNINSTALL_RESULT_PATTERN = "(Success|Failure.*|.*Unknown package:.*)"
 
-    def __init__(self, client, serial):
+    def __init__(self, client: ClientAsync, serial: str) -> None:
         self.client = client
         self.serial = serial
 
-    async def create_connection(self, set_transport=True, timeout=None):
+    async def create_connection(self, set_transport=True, timeout=None) -> ConnectionAsync:
         conn = await self.client.create_connection(timeout=timeout)
 
         if set_transport:
@@ -36,7 +38,8 @@ class DeviceAsync(TransportAsync):
 
         return conn
 
-    async def _push(self, src, dest, mode, progress):
+    async def _push(self, src: str, dest: str, mode: int, progress) -> None:
+        # Like the sync one, cannot guess the type of progress
         # Create a new connection for file transfer
         sync_conn = await self.sync()
         sync = SyncAsync(sync_conn)
@@ -44,7 +47,7 @@ class DeviceAsync(TransportAsync):
         async with sync_conn:
             await sync.push(src, dest, mode, progress)
 
-    async def push(self, src, dest, mode=0o644, progress=None):
+    async def push(self, src: str, dest: str, mode=0o644, progress=None) -> None:
         exists, isfile, isdir, basename, walk = await get_running_loop().run_in_executor(None, _get_src_info, src)
         if not exists:
             raise FileNotFoundError(f"Cannot find {src}")
@@ -61,7 +64,7 @@ class DeviceAsync(TransportAsync):
                 for item in files:
                     await self._push(os.path.join(root, item), os.path.join(dest, root_dir_path, item), mode, progress)
 
-    async def pull(self, src, dest):
+    async def pull(self, src: str, dest: str) -> bytearray:
         sync_conn = await self.sync()
         sync = SyncAsync(sync_conn)
 
