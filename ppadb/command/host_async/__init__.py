@@ -8,12 +8,12 @@ class HostAsync:
     DEVICE = "device"
     BOOTLOADER = "bootloader"
 
-    async def _execute_cmd(self, cmd):
+    async def _execute_cmd(self, cmd: str) -> str:
         async with await self.create_connection() as conn:
             await conn.send(cmd)
             return await conn.receive()
 
-    async def devices(self):
+    async def devices(self) -> list:
         cmd = "host:devices"
         result = await self._execute_cmd(cmd)
 
