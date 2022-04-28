@@ -9,7 +9,7 @@ class Host(Command):
     DEVICE = "device"
     BOOTLOADER = "bootloader"
 
-    def _execute_cmd(self, cmd, with_response=True):
+    def _execute_cmd(self, cmd: str, with_response=True) -> str:
         with self.create_connection() as conn:
             conn.send(cmd)
             if with_response:
@@ -18,7 +18,7 @@ class Host(Command):
             else:
                 conn.check_status()
 
-    def devices(self, state=None):
+    def devices(self, state=None) -> list:
         cmd = "host:devices"
         result = self._execute_cmd(cmd)
 
@@ -36,19 +36,19 @@ class Host(Command):
 
         return devices
 
-    def features(self):
+    def features(self) -> list:
         cmd = "host:features"
         result = self._execute_cmd(cmd)
         features = result.split(",")
         return features
 
-    def version(self):
+    def version(self) -> int:
         with self.create_connection() as conn:
             conn.send("host:version")
             version = conn.receive()
             return int(version, 16)
 
-    def kill(self):
+    def kill(self) -> bool:
         """
             Ask the ADB server to quit immediately. This is used when the
             ADB client detects that an obsolete server is running after an
@@ -59,11 +59,11 @@ class Host(Command):
 
         return True
 
-    def killforward_all(self):
+    def killforward_all(self) -> None:
         cmd = "host:killforward-all"
         self._execute_cmd(cmd, with_response=False)
 
-    def list_forward(self):
+    def list_forward(self) -> dict:
         cmd = "host:list-forward"
         result = self._execute_cmd(cmd)
 
@@ -78,17 +78,17 @@ class Host(Command):
 
         return device_forward_map
 
-    def remote_connect(self, host, port):
-        cmd = "host:connect:%s:%d" % (host, port)
+    def remote_connect(self, host: str, port: int) -> bool:
+        cmd = f"host:connect:{host}:{port"
         result = self._execute_cmd(cmd)
 
         return "connected" in result
 
-    def remote_disconnect(self, host=None, port=None):
+    def remote_disconnect(self, host=None, port=None) -> str:
         cmd = "host:disconnect:"
         if host:
-            cmd = f"host:disconnect:{host}"
+            cmd += f"{host}" # string formatting in case a string is not passed to the method
             if port:
-                cmd = f"{cmd}:{port}"
+                cmd += f":{port}"
 
         return self._execute_cmd(cmd)
