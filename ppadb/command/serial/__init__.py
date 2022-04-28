@@ -2,7 +2,7 @@ from ppadb.command import Command
 
 
 class Serial(Command):
-    def _execute_cmd(self, cmd, with_response=True):
+    def _execute_cmd(self, cmd: str, with_response=True) -> str:
         conn = self.create_connection(set_transport=False)
 
         with conn:
@@ -13,7 +13,7 @@ class Serial(Command):
             else:
                 conn.check_status()
 
-    def forward(self, local, remote, norebind=False):
+    def forward(self, local: str, remote: str, norebind=False) -> None:
         if norebind:
             cmd = f"host-serial:{self.serial}:forward:norebind:{local};{remote}"
         else:
@@ -21,7 +21,7 @@ class Serial(Command):
 
         self._execute_cmd(cmd, with_response=False)
 
-    def list_forward(self):
+    def list_forward(self) -> dict:
         # According to https://android.googlesource.com/platform/system/core/+/master/adb/adb_listeners.cpp#129
         # And https://android.googlesource.com/platform/system/core/+/master/adb/SERVICES.TXT#130
         # The 'list-forward' always lists all existing forward connections from the adb server
@@ -39,25 +39,25 @@ class Serial(Command):
 
         return forward_map
 
-    def killforward(self, local):
+    def killforward(self, local: str) -> None:
         cmd = f"host-serial:{self.serial}:killforward:{local}"
         self._execute_cmd(cmd, with_response=False)
 
-    def killforward_all(self):
+    def killforward_all(self) -> None:
         # killforward-all command ignores the <host-prefix> and remove all the forward mapping.
         # So we need to implement this function by self
         forward_map = self.list_forward()
         for local, remote in forward_map.items():
             self.killforward(local)
 
-    def get_device_path(self):
+    def get_device_path(self) -> str:
         cmd = f"host-serial:{self.serial}:get-devpath"
         return self._execute_cmd(cmd)
 
-    def get_serial_no(self):
+    def get_serial_no(self) -> str:
         cmd = f"host-serial:{self.serial}:get-serialno"
         return self._execute_cmd(cmd)
 
-    def get_state(self):
+    def get_state(self) -> str:
         cmd = f"host-serial:{self.serial}:get-state"
         return self._execute_cmd(cmd)
