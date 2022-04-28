@@ -1,8 +1,12 @@
 import re
 import os
 
-from ppadb.command.transport import Transport
+from ppadb import InstallError
+
+from ppadb.client import Client
+
 from ppadb.command.serial import Serial
+from ppadb.command.transport import Transport
 
 from ppadb.plugins.device.input import Input
 from ppadb.plugins.device.utils import Utils
@@ -14,8 +18,6 @@ from ppadb.plugins.device.batterystats import BatteryStats
 from ppadb.sync import Sync
 
 from ppadb.utils.logger import AdbLogging
-
-from ppadb import InstallError
 
 logger = AdbLogging.get_logger(__name__)
 
@@ -34,11 +36,11 @@ class Device(Transport, Serial, Input, Utils, WM, Traffic, CPUStat, BatteryStats
     INSTALL_RESULT_PATTERN = "(Success|Failure|Error)\s?(.*)"
     UNINSTALL_RESULT_PATTERN = "(Success|Failure.*|.*Unknown package:.*)"
 
-    def __init__(self, client, serial):
+    def __init__(self, client: Client, serial: str) -> None:
         self.client = client
         self.serial = serial
 
-    def create_connection(self, set_transport=True, timeout=None):
+    def create_connection(self, set_transport=True, timeout=None) -> Connection:
         conn = self.client.create_connection(timeout=timeout)
 
         if set_transport:
@@ -46,7 +48,8 @@ class Device(Transport, Serial, Input, Utils, WM, Traffic, CPUStat, BatteryStats
 
         return conn
 
-    def _push(self, src, dest, mode, progress):
+    def _push(self, src: str, dest: str, mode: int, progress) -> None:
+        # Cannot guess the type of progress for the moment
         # Create a new connection for file transfer
         sync_conn = self.sync()
         sync = Sync(sync_conn)
@@ -54,13 +57,12 @@ class Device(Transport, Serial, Input, Utils, WM, Traffic, CPUStat, BatteryStats
         with sync_conn:
             sync.push(src, dest, mode, progress)
 
-    def push(self, src, dest, mode=0o644, progress=None):
+    def push(self, src: str, dest: str, mode=0o644, progress=None) -> None:
         if not os.path.exists(src):
             raise FileNotFoundError(f"Cannot find {src}")
         elif os.path.isfile(src):
             self._push(src, dest, mode, progress)
         elif os.path.isdir(src):
-
             basename = os.path.basename(src)
 
             for root, dirs, files in os.walk(src):
@@ -74,14 +76,16 @@ class Device(Transport, Serial, Input, Utils, WM, Traffic, CPUStat, BatteryStats
                 for item in files:
                     self._push(os.path.join(root, item), os.path.join(dest, root_dir_path, item), mode, progress)
 
-    def pull(self, src, dest):
+    def pull(self, src: str, dest: str) -> bytearray:
+        # Typing from https://github.com/Swind/pure-python-adb/blob/b136202b04660db57b49418514dd9eddc2ecb365/ppadb/sync/__init__.py#L66
+        # and https://github.com/Swind/pure-python-adb/blob/b136202b04660db57b49418514dd9eddc2ecb365/ppadb/sync/__init__.py#L92
         sync_conn = self.sync()
         sync = Sync(sync_conn)
 
         with sync_conn:
             return sync.pull(src, dest)
 
-    def install(self, path,
+    def install(self, path: str,
                 forward_lock=False,  # -l
                 reinstall=False,  # -r
                 test=False,  # -t
@@ -90,7 +94,7 @@ class Device(Transport, Serial, Input, Utils, WM, Traffic, CPUStat, BatteryStats
                 internal_system_memory=False,  # -f
                 downgrade=False,  # -d
                 grand_all_permissions=False  # -g
-                ):
+                ) -> bool:
         dest = Sync.temp(path)
         self.push(path, dest)
 
@@ -118,7 +122,7 @@ class Device(Transport, Serial, Input, Utils, WM, Traffic, CPUStat, BatteryStats
         finally:
             self.shell(f"rm -f {dest}")
 
-    def is_installed(self, package):
+    def is_installed(self, package: str) -> bool:
         result = self.shell('pm path {}'.format(package))
 
         if "package:" in result:
@@ -126,7 +130,7 @@ class Device(Transport, Serial, Input, Utils, WM, Traffic, CPUStat, BatteryStats
         else:
             return False
 
-    def uninstall(self, package):
+    def uninstall(self, package: str) -> bool:
         result = self.shell('pm uninstall {}'.format(package))
 
         m = re.search(self.UNINSTALL_RESULT_PATTERN, result)
